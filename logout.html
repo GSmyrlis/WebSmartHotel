@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: url("img/hotel.jpg");
+            background-size: cover;
+            background-position: center;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
+
+    button {
+        background-color: #3498db;
+        color: #fff;
+        padding: 15px 30px; /* Increase the padding to make the button larger */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 18px; /* Increase the font size to make the text larger */
+    }
+
+
+        button:hover {
+            background-color: #ff0000;
+        }
+    </style>
+    <script>
+        // Function to confirm the logout
+        function confirmLogout() {
+            var confirmation = confirm("Are you sure you want to log out?");
+            if (confirmation) {
+                // User clicked "OK" (equivalent to "Yes") in the confirmation dialog
+                // You can add any additional logout logic here, such as clearing session data or cookies.
+                alert("You have been logged out.");
+                window.location.href = "login.html"; // Redirect to the login page
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <button onclick="confirmLogout()">Logout</button>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cleaning - Smart Hotel</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+	<input type="checkbox" id="checkbox">
+	<header class="header">
+		<h2 class="u-name">SMART <b>HOTEL</b>
+			<label for="checkbox">
+				<i id="navbtn" class="fa fa-bars" aria-hidden="true"></i>
+			</label>
+		</h2>
+		<i class="fa fa-user" aria-hidden="true"></i>
+	</header>
+	<div class="body">
+		<nav class="side-bar">
+			<ul>
+				<li>
+					<a href="reception.html">
+						<i class="fa fa-address-book" aria-hidden="true"></i>
+						<span>Reception</span>
+					</a>
+				</li>
+				<li>
+					<a href="restaurant.html">
+						<i class="fa fa-cutlery" aria-hidden="true"></i>
+						<span>Restaurant</span>
+					</a>
+				</li>
+				<li>
+					<a href="cleaning.html">
+						<i class="fa fa-bed" aria-hidden="true"></i>
+						<span>Cleaning</span>
+					</a>
+				</li>
+				<li>
+					<a href="rating.html">
+						<i class="fa fa-star" aria-hidden="true"></i>
+						<span>Rating</span>
+					</a>
+				</li>
+				<li>
+					<a href="about.html">
+						<i class="fa fa-info-circle" aria-hidden="true"></i>
+						<span>About</span>
+					</a>
+				</li>
+				<li>
+					<a href="#">
+						<i class="fa fa-sign-out" aria-hidden="true"></i>
+						<span>Logout</span>
+					</a>
+				</li>
+			</ul>
+		</nav>
+		<section class="section-1">
+			<h1>Cleaning Service Requests:</h1>
+			<div id="requests-container" class="card-container"></div>
+		</section>
+	</div>
+</body>
+<script>
+// Retrieve the bearer token from where you have stored it (localStorage)
+var bearerToken = localStorage.getItem('bearerToken');
+// Make the GET request to the API
+fetch('http://192.168.117.42:5000/api/hotel/cleanings', {
+	method: 'GET',
+	headers: {
+		'Authorization': bearerToken,
+		'Content-Type': 'application/json'
+	}
+})
+.then(response => {
+	if (!response.ok) {
+		throw new Error('Network response was not ok');
+	}
+	return response.json();
+})
+.then(data => {
+	// Handle the JSON response (data) here
+	displayRequests(data);
+})
+.catch(error => {
+	console.error('Error fetching data:', error);
+	// Handle the error gracefully, e.g., display an error message to the user
+});
+
+function displayRequests(data) {
+	var requestsContainer = document.getElementById('requests-container');
+	requestsContainer.innerHTML = ''; // Clear existing content
+
+	if (!Array.isArray(data)) {
+		// Handle the case where data is not an array (e.g., display an error message)
+		console.error('Data is not an array:', data);
+		// Display an error message to the user or take appropriate action
+		return;
+	}
+
+	data.forEach(request => {
+		// Create a card element for each request
+		var card = document.createElement('div');
+		card.className = 'card';
+
+        // Create a card element for each request
+        var card = document.createElement('div');
+        card.className = 'card';
+
+        // Create elements for displaying data fields
+        var adminMessage = document.createElement('div');
+        adminMessage.className = 'field';
+        adminMessage.innerHTML = `Admin Message: <span id="adminMessage-${request.id}">${request.AdminMessage ? request.AdminMessage : 'No message'}</span>`;
+
+        var reservDatetime = document.createElement('div');
+        reservDatetime.className = 'field';
+        reservDatetime.innerHTML = `Reservation Date & Time: ${request.CleaningServiceReservDateTime}`;
+
+        var requestState = document.createElement('div');
+        requestState.className = 'field';
+        requestState.innerHTML = `Request State: <span id="requestState-${request.id}">${request.RequestState}</span>`;
+
+        var roomNumber = document.createElement('div');
+        roomNumber.className = 'field';
+        roomNumber.innerHTML = `Room Number: ${request.RoomNumber}`;
+
+        var id = document.createElement('div');
+        id.className = 'field';
+        id.innerHTML = `Request ID: ${request.id}`;
+
+        // Create input fields for editing Admin Message and Request State
+        var adminMessageInput = document.createElement('input');
+        adminMessageInput.type = 'text';
+        adminMessageInput.placeholder = 'Edit Admin Message';
+        adminMessageInput.id = `adminMessageInput-${request.id}`;
+
+        var requestStateInput = document.createElement('input');
+        requestStateInput.type = 'number';
+        requestStateInput.placeholder = 'Edit Request State';
+        requestStateInput.id = `requestStateInput-${request.id}`;
+
+        // Create a button to submit updates
+        var updateButton = document.createElement('button');
+        updateButton.textContent = 'Update';
+        updateButton.addEventListener('click', function () {
+            // Get the edited values from input fields
+            var editedAdminMessage = document.getElementById(`adminMessageInput-${request.id}`).value;
+            var editedRequestState = document.getElementById(`requestStateInput-${request.id}`).value;
+
+            // Send a POST request with updated data
+            var url = `http://192.168.117.42:5000/api/hotel/cleaning/${request.id}`;
+            var updatedData = {
+                AdminMessage: editedAdminMessage,
+                RequestState: editedRequestState
+            };
+			var bearerToken = localStorage.getItem('bearerToken');
+
+            fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `${bearerToken}`
+				},
+				body: JSON.stringify(updatedData)
+			})
+			.then(response => {
+				if (response.status === 200) {
+					alert('Update successful!');
+				} else {
+					alert('Update failed. Please check your data and try again.');
+				}
+			})
+			.catch(error => {
+				alert('Error updating data:');
+			});
+			
+        });
+		var deleteButton = document.createElement('button');
+			deleteButton.textContent = 'Delete';
+			deleteButton.addEventListener('click', function () {
+				// Get the request ID
+				var requestId = request.id;
+
+				// Send a DELETE request to delete the request
+				var url = `http://192.168.117.42:5000/api/hotel/cleaning/${requestId}`;
+				var bearerToken = localStorage.getItem('bearerToken');
+
+				fetch(url, {
+					method: 'DELETE',
+					headers: {
+						'Authorization': bearerToken
+					}
+				})
+					.then(response => {
+						if (response.status === 204 || response.status === 200) {
+							alert('Request deleted successfully!');
+							// Reload the page to reflect the changes
+							location.reload();
+						} else {
+							alert('Failed to delete request. Please try again.');
+							location.reload();
+						}
+					})
+					.catch(error => {
+						alert('Error deleting request:', error);
+					});
+			});
+
+        // Append data field elements to the card
+        card.appendChild(adminMessage);
+        card.appendChild(adminMessageInput); 
+        card.appendChild(reservDatetime);
+        card.appendChild(requestState);
+        card.appendChild(requestStateInput); 
+        card.appendChild(roomNumber);
+        card.appendChild(id);
+        card.appendChild(updateButton);
+		card.appendChild(deleteButton);
+
+        // Append the card to the container
+        requestsContainer.appendChild(card);
+    });
+}
+
+</script>
+<style>
+	/* CSS styles for the card view and fields */
+	.card-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20px;
+	}
+
+	.card {
+		background-color: #ffffff;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+		padding: 10px;
+		width: 300px;
+		box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	.field {
+		margin-bottom: 10px;
+	}
+</style>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Rating - Smart Hotel</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+	<input type="checkbox" id="checkbox">
+	<header class="header">
+		<h2 class="u-name">SMART <b>HOTEL</b>
+			<label for="checkbox">
+				<i id="navbtn" class="fa fa-bars" aria-hidden="true"></i>
+			</label>
+		</h2>
+		<i class="fa fa-user" aria-hidden="true"></i>
+	</header>
+	<div class="body">
+		<nav class="side-bar">
+			<ul>
+				<li>
+					<a href="reception.html">
+						<i class="fa fa-address-book" aria-hidden="true"></i>
+						<span>Reception</span>
+					</a>
+				</li>
+				<li>
+					<a href="restaurant.html">
+						<i class="fa fa-cutlery" aria-hidden="true"></i>
+						<span>Restaurant</span>
+					</a>
+				</li>
+				<li>
+					<a href="cleaning.html">
+						<i class="fa fa-bed" aria-hidden="true"></i>
+						<span>Cleaning</span>
+					</a>
+				</li>
+				<li>
+					<a href="rating.html">
+						<i class="fa fa-star" aria-hidden="true"></i>
+						<span>Rating</span>
+					</a>
+				</li>
+				<li>
+					<a href="about.html">
+						<i class="fa fa-info-circle" aria-hidden="true"></i>
+						<span>About</span>
+					</a>
+				</li>
+				<li>
+					<a href="#">
+						<i class="fa fa-sign-out" aria-hidden="true"></i>
+						<span>Logout</span>
+					</a>
+				</li>
+			</ul>
+		</nav>
+		<section class="section-1">				
+			<h1>Hotel Ratings</h1>
+			<div id="rates-container">
+				<!-- A single card for the average of all rates -->
+				<div class="card" id="average-rates-card">
+					<div class="card-content">
+						<!-- Average rate content will be added here -->
+					</div>
+				</div>
+				<!-- Container for displaying individual room rates horizontally -->
+				<div class="horizontal-rates-container">
+					<!-- Individual room rate cards will be added here -->
+				</div>
+			</div>
+		</section>
+	</div>
+</body>
+<script>
+    // Function to fetch rates data from the API and update the UI
+    function displayRates() {
+        const bearerToken = localStorage.getItem('bearerToken'); // Retrieve the bearer token
+    
+        fetch('http://192.168.117.42:5000/api/rates', {
+            method: 'GET',
+            headers: {
+                'Authorization': bearerToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const averageRates = {}; // Object to store average rates for each room
+            const horizontalRatesContainer = document.querySelector('.horizontal-rates-container');
+    
+            // Clear existing content
+            horizontalRatesContainer.innerHTML = '';
+    
+            // Display individual room rates
+            data.forEach(rate => {
+                const roomNumber = rate.RoomNumber;
+    
+                // Create a div for individual room rate card
+                const roomRateCard = document.createElement('div');
+                roomRateCard.className = 'card horizontal-rate-card';
+                roomRateCard.innerHTML = `
+                    <h3>Room ${roomNumber}</h3>
+                    <p>Hospitality: ${rate.Hospitality}</p>
+                    <p>Comfort: ${rate.Comfort}</p>
+                    <p>Location: ${rate.Location}</p>
+                    <p>Facilities: ${rate.Facilities}</p>
+                    <p>Overall: ${rate.Overall}</p>
+                `;
+    
+                // Add room rate card to the horizontal rates container
+                horizontalRatesContainer.appendChild(roomRateCard);
+            });
+    
+            // Calculate the average of all rates
+            const numRates = data.length;
+            const totalHospitality = data.reduce((sum, rate) => sum + rate.Hospitality, 0);
+            const totalComfort = data.reduce((sum, rate) => sum + rate.Comfort, 0);
+            const totalLocation = data.reduce((sum, rate) => sum + rate.Location, 0);
+            const totalFacilities = data.reduce((sum, rate) => sum + rate.Facilities, 0);
+            const totalOverall = data.reduce((sum, rate) => sum + rate.Overall, 0);
+    
+            const averageHospitality = totalHospitality / numRates;
+            const averageComfort = totalComfort / numRates;
+            const averageLocation = totalLocation / numRates;
+            const averageFacilities = totalFacilities / numRates;
+            const averageOverall = totalOverall / numRates;
+    
+            // Create a div for the average of all rates card
+            const averageRatesCard = document.createElement('div');
+            averageRatesCard.className = 'card average-rates-card ';
+            averageRatesCard.innerHTML = `
+                <h3>Average Rates</h3>
+                <p>Hospitality: ${averageHospitality.toFixed(2)}</p>
+                <p>Comfort: ${averageComfort.toFixed(2)}</p>
+                <p>Location: ${averageLocation.toFixed(2)}</p>
+                <p>Facilities: ${averageFacilities.toFixed(2)}</p>
+                <p>Overall: ${averageOverall.toFixed(2)}</p>
+            `;
+    
+            // Insert the average rates card after displaying individual room rates
+            horizontalRatesContainer.appendChild(averageRatesCard);
+        })
+        .catch(error => {
+            console.error('Error fetching rates:', error);
+        });
+    }
+    
+    // Call the displayRates function to fetch and display rates
+    displayRates();
+    </script>
+    
+<style>
+/* Style for the horizontal-rates-container */
+.horizontal-rates-container {
+    display: flex;
+    flex-wrap: wrap; /* Wrap items to the next line when the container is not wide enough */
+    gap: 20px; /* Adjust the gap between individual room rate cards */
+}
+
+/* Style for individual room rate cards within the horizontal-rates-container */
+.horizontal-rate-card {
+    flex: 0 0 calc(33.333% - 20px); /* Adjust the width of each card as needed */
+    text-align: left; /* Align text to the left within each card */
+    padding: 10px; /* Add padding to provide space around the text */
+    border: 1px solid #ccc; /* Add a border for card separation */
+    background-color: #f9f9f9; /* Add a background color to cards */
+}
+
+/* Style for the title within each individual room rate card */
+.horizontal-rate-card h3 {
+    font-size: 1.2em; /* Adjust the font size as needed */
+    margin-bottom: 10px; /* Add some space below the title */
+}
+/* CSS styles for the average rates card */
+.card.average-rates-card {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    width: 300px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px; /* Add margin to separate from other cards */
+}
+
+/* CSS styles for the average rates card title */
+.card.average-rates-card h3 {
+    margin: 0; /* Remove default margin */
+    padding-bottom: 10px; /* Add spacing between title and content */
+}
+
+</style>
+</html>
