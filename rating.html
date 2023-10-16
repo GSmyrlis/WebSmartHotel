@@ -80,7 +80,7 @@
     function displayRates() {
         const bearerToken = localStorage.getItem('bearerToken'); // Retrieve the bearer token
     
-        fetch('http://192.168.117.42:5000/api/rates', {
+        fetch('http://192.168.1.108:5000/api/rates', {
             method: 'GET',
             headers: {
                 'Authorization': bearerToken,

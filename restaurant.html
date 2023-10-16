@@ -70,7 +70,7 @@
 	// Retrieve the bearer token from where you have stored it (localStorage)
 	var bearerToken = localStorage.getItem('bearerToken');
 	// Make the GET request to the API
-	fetch('http://192.168.117.42:5000/api/hotel/restaurants', {
+	fetch('http://192.168.1.108:5000/api/hotel/restaurants', {
 		method: 'GET',
 		headers: {
 			'Authorization': bearerToken,
@@ -92,7 +92,28 @@
 			// Handle the error gracefully, e.g., display an error message to the user
 		});
 
+	// Function to parse the reservation datetime string and return a Date object
+	function parseReservDatetime(datetimeString) {
+		const [datePart, timePart] = datetimeString.split(' ');
+		const [day, month, yearPart] = datePart.split('/');
+		const [hours, minutes, seconds] = timePart.split(':');
+
+		// Check if the yearPart is 2 digits or 4 digits
+		const year = yearPart.length === 2 ? (new Date().getFullYear() - (new Date().getFullYear() % 100) + parseInt(yearPart)) : parseInt(yearPart);
+
+		// Month is 0-based in JavaScript, so we subtract 1
+		return new Date(year, month - 1, day, hours, minutes, seconds);
+	}
+
+
 	function displayRequests(data) {
+		// Sort the data by reservation datetime
+		data.sort((a, b) => {
+			const dateA = parseReservDatetime(a.RestaurantReservDateTime);
+			const dateB = parseReservDatetime(b.RestaurantReservDateTime);
+			return dateA - dateB;
+		});
+
 		var requestsContainer = document.getElementById('requests-container');
 		requestsContainer.innerHTML = ''; // Clear existing content
 
@@ -108,14 +129,14 @@
 			var card = document.createElement('div');
 			card.className = 'card';
 
-			// Create a card element for each request
-			var card = document.createElement('div');
-			card.className = 'card';
-
 			// Create elements for displaying data fields
 			var adminMessage = document.createElement('div');
 			adminMessage.className = 'field';
 			adminMessage.innerHTML = `Admin Message: <span id="adminMessage-${request.id}">${request.AdminMessage ? request.AdminMessage : 'No message'}</span>`;
+
+			var reservDatetime = document.createElement('div');
+			reservDatetime.className = 'field';
+			reservDatetime.innerHTML = `Reservation Date & Time: ${request.RestaurantReservDateTime}`;
 
 			var requestState = document.createElement('div');
 			requestState.className = 'field';
@@ -124,10 +145,6 @@
 			var roomNumber = document.createElement('div');
 			roomNumber.className = 'field';
 			roomNumber.innerHTML = `Room Number: ${request.RoomNumber}`;
-
-			var reservDatetime = document.createElement('div');
-			reservDatetime.className = 'field';
-			reservDatetime.innerHTML = `Reservation Date & Time: ${request.RestaurantReservDateTime}`;
 
 			var reservQuant = document.createElement('div');
 			reservQuant.className = 'field';
@@ -161,7 +178,7 @@
 				var editedRequestState = document.getElementById(`requestStateInput-${request.id}`).value;
 
 				// Send a POST request with updated data
-				var url = `http://192.168.117.42:5000/api/hotel/restaurant/${request.id}`;
+				var url = `http://192.168.1.108:5000/api/hotel/restaurant/${request.id}`;
 				var updatedData = {
 					AdminMessage: editedAdminMessage,
 					RequestState: editedRequestState
@@ -186,7 +203,6 @@
 					.catch(error => {
 						alert('Error updating data:');
 					});
-
 			});
 
 			var deleteButton = document.createElement('button');
@@ -196,7 +212,7 @@
 				var requestId = request.id;
 
 				// Send a DELETE request to delete the request
-				var url = `http://192.168.117.42:5000/api/hotel/restaurant/${requestId}`;
+				var url = `http://192.168.1.108:5000/api/hotel/restaurant/${requestId}`;
 				var bearerToken = localStorage.getItem('bearerToken');
 
 				fetch(url, {
@@ -222,12 +238,9 @@
 			// Append data field elements to the card
 			card.appendChild(adminMessage);
 			card.appendChild(adminMessageInput);
+			card.appendChild(reservDatetime);
 			card.appendChild(requestState);
 			card.appendChild(requestStateInput);
-			card.appendChild(roomNumber);
-			card.appendChild(reservDatetime);
-			card.appendChild(reservQuant);
-			card.appendChild(reservComment);
 			card.appendChild(roomNumber);
 			card.appendChild(id);
 			card.appendChild(updateButton);
@@ -237,6 +250,7 @@
 			requestsContainer.appendChild(card);
 		});
 	}
+
 
 </script>
 <style>

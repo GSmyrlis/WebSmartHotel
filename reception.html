@@ -10,7 +10,7 @@
     <script>
         // Function to get hotel data
         function getHotelData() {
-            var endpoint = "http://192.168.117.42:5000/api/hotel";
+            var endpoint = "http://192.168.1.108:5000/api/hotel";
 
      $.ajax({
         url: endpoint,
@@ -37,7 +37,7 @@
     });
         }
         function saveHotelData() {
-            var endpoint = "http://192.168.117.42:5000/api/hotel";
+            var endpoint = "http:/192.168.1.108:5000/api/hotel";
             var hotelData = {
                 "HotelName": document.getElementById("hotelName").value,
                 "HotelAddress": document.getElementById("hotelAddress").value,
